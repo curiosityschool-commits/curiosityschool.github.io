@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Curiosity School — A serious inquiry into what education is for, what it has failed to do, and what it could become.">
+<title>Curiosity School</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ── THEME TOKENS ── */
+  :root,
+  [data-theme="dark"] {
+    --bg:       #0a0a08;
+    --bg2:      #111110;
+    --bg3:      #1a1a18;
+    --line:     rgba(255,255,255,0.08);
+    --line2:    rgba(255,255,255,0.15);
+    --text:     #e8e6df;
+    --text2:    #9a9890;
+    --text3:    #5a5856;
+    --accent:   #c8a96e;
+    --accent2:  #8b7355;
+    --ghost:    rgba(255,255,255,0.04);
+    --nav-bg:   rgba(10,10,8,0.88);
+  }
+
+  [data-theme="light"] {
+    --bg:       #f5f2eb;
+    --bg2:      #ede9e0;
+    --bg3:      #e4dfd4;
+    --line:     rgba(0,0,0,0.08);
+    --line2:    rgba(0,0,0,0.15);
+    --text:     #1a1816;
+    --text2:    #5a5650;
+    --text3:    #9a9488;
+    --accent:   #8b5e2a;
+    --accent2:  #c49a5e;
+    --ghost:    rgba(0,0,0,0.04);
+    --nav-bg:   rgba(245,242,235,0.92);
+  }
+
+  /* ── BASE ── */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Lora',Georgia,serif;
+    font-size:17px;
+    line-height:1.8;
+    overflow-x:hidden;
+    transition:background .35s ease, color .35s ease;
+  }
+
+  /* Noise texture — dark mode only */
+  [data-theme="dark"] body::before{
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity:0.03;pointer-events:none;z-index:1000;
+  }
+
+  /* ── NAV ── */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:0 clamp(1.5rem,5vw,4rem);height:64px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    background:var(--nav-bg);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:background .35s ease, border-color .35s ease;
+  }
+  .nav-wordmark{
+    font-family:'DM Mono',monospace;font-size:12px;font-weight:300;
+    letter-spacing:.15em;text-transform:uppercase;
+    color:var(--text2);text-decoration:none;transition:color .2s;
+  }
+  .nav-wordmark:hover{color:var(--text);}
+
+  .nav-right{display:flex;align-items:center;gap:clamp(1rem,3vw,2.5rem);}
+
+  .nav-links{display:flex;gap:clamp(1.5rem,3vw,3rem);list-style:none;}
+  .nav-links a{
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--text2);text-decoration:none;transition:color .2s;
+  }
+  .nav-links a:hover{color:var(--accent);}
+
+  /* Theme toggle */
+  .theme-toggle{
+    background:none;border:1px solid var(--line2);
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--text2);transition:all .2s;
+    flex-shrink:0;
+  }
+  .theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
+  .theme-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;}
+
+  /* Sun icon (shown in dark mode) */
+  .icon-sun{display:block;}
+  .icon-moon{display:none;}
+  [data-theme="light"] .icon-sun{display:none;}
+  [data-theme="light"] .icon-moon{display:block;}
+
+  .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;}
+  .nav-toggle span{display:block;width:22px;height:1px;background:var(--text2);transition:all .3s;}
+
+  /* ── HERO ── */
+  #hero{
+    min-height:100vh;
+    padding:64px clamp(1.5rem,5vw,4rem) 0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr auto;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* Giant ghosted ? in background */
+  .hero-bg-mark{
+    position:absolute;
+    right:-2%;
+    top:50%;
+    transform:translateY(-50%);
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(400px,55vw,700px);
+    font-style:italic;
+    font-weight:700;
+    color:var(--ghost);
+    line-height:1;
+    user-select:none;
+    pointer-events:none;
+    z-index:0;
+    transition:color .35s ease;
+  }
+
+  /* Left — main content */
+  .hero-main{
+    grid-column:1;grid-row:1;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:3rem 3rem 3rem 0;
+    position:relative;z-index:2;
+  }
+
+  .hero-eyebrow{
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent);
+    margin-bottom:2.5rem;display:flex;align-items:center;gap:1rem;
+  }
+  .hero-eyebrow::after{content:'';display:block;width:48px;height:1px;background:var(--accent2);}
+
+  .hero-title{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(2.8rem,5.5vw,6.5rem);
+    font-weight:400;line-height:1.05;letter-spacing:-.02em;
+    color:var(--text);margin-bottom:2.5rem;
+  }
+  .hero-title .edu{
+    font-style:italic;color:var(--accent);
+    text-decoration:underline;
+    text-decoration-color:var(--accent2);
+    text-underline-offset:8px;
+    text-decoration-thickness:2px;
+  }
+
+  .hero-sub{
+    font-family:'Lora',Georgia,serif;
+    font-size:clamp(.95rem,1.3vw,1.1rem);color:var(--text2);
+    max-width:440px;line-height:1.9;margin-bottom:3rem;font-style:italic;
+  }
+
+  .hero-cta{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center;}
+
+  /* Right — questions */
+  .hero-questions{
+    grid-column:2;grid-row:1;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:3rem 0 3rem 3rem;
+    border-left:1px solid var(--line);
+    position:relative;z-index:2;
+  }
+
+  .questions-label{
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--text3);
+    margin-bottom:2rem;
+  }
+
+  .questions-list{
+    display:flex;flex-direction:column;
+    list-style:none;
+  }
+
+  .questions-list li{
+    display:flex;
+    align-items:baseline;
+    gap:1rem;
+    padding:1.1rem 0;
+    border-bottom:1px solid var(--line);
+    transition:all .2s;
+  }
+  .questions-list li:first-child{border-top:1px solid var(--line);}
+  .questions-list li:hover .q-text{color:var(--text);}
+
+  .q-num{
+    font-family:'DM Mono',monospace;font-size:9px;
+    color:var(--text3);min-width:20px;flex-shrink:0;
+    transition:color .2s;
+  }
+
+  .q-text{
+    font-family:'Lora',Georgia,serif;
+    font-size:clamp(.85rem,1.1vw,1rem);
+    font-style:italic;
+    color:var(--text2);
+    line-height:1.5;
+    transition:color .2s;
+  }
+
+  /* Bottom bar */
+  .hero-bottom{
+    grid-column:1/-1;grid-row:2;
+    border-top:1px solid var(--line);
+    padding:1.2rem 0;
+    display:flex;justify-content:space-between;align-items:center;
+    position:relative;z-index:2;
+  }
+  .hero-tagline{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);}
+  .hero-scroll-hint{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:.8rem;}
+  .hero-scroll-hint::after{content:'↓';animation:bounce 2s ease-in-out infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0);opacity:.4;}50%{transform:translateY(4px);opacity:1;}}
+
+  /* ── BUTTONS ── */
+  .btn-primary{
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--bg);background:var(--accent);
+    border:1px solid var(--accent);padding:14px 28px;
+    text-decoration:none;transition:all .2s;
+  }
+  .btn-primary:hover{background:transparent;color:var(--accent);}
+  .btn-secondary{
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--text2);border:1px solid var(--line2);
+    padding:14px 28px;text-decoration:none;transition:all .2s;
+  }
+  .btn-secondary:hover{color:var(--text);border-color:var(--text3);}
+
+  /* ── SECTIONS ── */
+  section{
+    padding:clamp(4rem,8vw,8rem) clamp(1.5rem,5vw,4rem);
+    border-bottom:1px solid var(--line);
+    transition:background .35s ease;
+  }
+  .section-label{
+    font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--text3);
+    margin-bottom:3rem;display:flex;align-items:center;gap:1rem;
+  }
+  .section-label::before{content:attr(data-num);color:var(--accent2);}
+  h2{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(2rem,4vw,3.5rem);font-weight:400;
+    line-height:1.15;color:var(--text);margin-bottom:2rem;
+  }
+  h2 em{font-style:italic;color:var(--accent);}
+  p{color:var(--text2);margin-bottom:1.5rem;max-width:68ch;}
+  p:last-child{margin-bottom:0;}
+
+  /* PROBLEM */
+  #problem{background:var(--bg2);}
+  .problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;margin-top:3rem;}
+  .problem-statement{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(1.3rem,2.5vw,1.8rem);font-style:italic;
+    color:var(--text);line-height:1.5;
+    border-left:1px solid var(--accent2);padding-left:2rem;
+  }
+  .problem-body p{font-size:16px;}
+
+  /* WHAT */
+  .what-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(3rem,6vw,6rem);align-items:start;}
+  .what-sticky{position:sticky;top:96px;}
+  .big-question{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(4rem,8vw,9rem);font-weight:700;
+    color:transparent;line-height:1;
+    -webkit-text-stroke:1px var(--line2);
+    margin-bottom:2rem;letter-spacing:-.02em;user-select:none;
+  }
+  .what-body p{font-size:16px;line-height:1.9;}
+
+  /* PROJECTS */
+  #projects{background:var(--bg2);}
+  .projects-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:1px;background:var(--line);border:1px solid var(--line);margin-top:3rem;
+  }
+  .project-card{background:var(--bg2);padding:2.5rem;position:relative;overflow:hidden;transition:background .2s;}
+  .project-card::after{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--accent);transition:height .3s ease;}
+  .project-card:hover{background:var(--bg3);}
+  .project-card:hover::after{height:100%;}
+  .project-status{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem;}
+  .project-status.soon{color:var(--text3);}
+  .status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
+  .project-status.soon .status-dot{animation:none;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .project-title{font-family:'Playfair Display',Georgia,serif;font-size:1.3rem;font-weight:400;color:var(--text);margin-bottom:1rem;line-height:1.3;}
+  .project-desc{font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:0;max-width:none;}
+
+  /* ESSAYS */
+  .essays-intro{font-size:16px;font-style:italic;color:var(--text2);margin-bottom:3rem;}
+  .essay-list{display:flex;flex-direction:column;}
+  .essay-item{display:flex;align-items:baseline;gap:2rem;padding:1.8rem 0;border-bottom:1px solid var(--line);text-decoration:none;transition:all .2s;}
+  .essay-item:first-child{border-top:1px solid var(--line);}
+  .essay-item:hover .essay-title{color:var(--accent);}
+  .essay-item:hover .essay-arrow{transform:translateX(4px);color:var(--accent);}
+  .essay-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:2rem;}
+  .essay-content{flex:1;}
+  .essay-title{font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;font-weight:400;color:var(--text);margin-bottom:.3rem;line-height:1.3;transition:color .2s;}
+  .essay-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;}
+  .essay-arrow{font-size:1rem;color:var(--text3);transition:all .2s;}
+
+  /* CHANNELS */
+  #channels{background:var(--bg2);}
+  .channels-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:3rem;}
+  .channel-card{border:1px solid var(--line);padding:2rem;text-decoration:none;transition:all .2s;display:flex;flex-direction:column;gap:1rem;}
+  .channel-card:hover{border-color:var(--accent2);background:rgba(139,93,42,0.06);}
+  .channel-icon{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);}
+  .channel-name{font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:400;color:var(--text);}
+  .channel-desc{font-size:13px;color:var(--text2);line-height:1.7;}
+  .channel-arrow{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2);margin-top:auto;transition:transform .2s;}
+  .channel-card:hover .channel-arrow{transform:translateX(4px);}
+
+  /* CONNECT */
+  .connect-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:clamp(3rem,6vw,6rem);align-items:start;}
+  .connect-text p{font-size:16px;}
+  .connect-form{display:flex;flex-direction:column;gap:1.2rem;}
+  .form-group{display:flex;flex-direction:column;gap:.5rem;}
+  .form-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);}
+  .form-input,.form-select,.form-textarea{
+    background:var(--bg3);border:1px solid var(--line);
+    color:var(--text);font-family:'Lora',Georgia,serif;font-size:15px;
+    padding:12px 16px;outline:none;transition:border-color .2s, background .35s ease;
+    width:100%;appearance:none;-webkit-appearance:none;
+  }
+  .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent2);}
+  .form-textarea{resize:vertical;min-height:120px;}
+  .form-select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9488' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;cursor:pointer;
+  }
+  .form-select option{background:var(--bg3);}
+  .form-submit{
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--bg);background:var(--accent);
+    border:1px solid var(--accent);padding:14px 28px;cursor:pointer;
+    transition:all .2s;align-self:flex-start;
+  }
+  .form-submit:hover{background:transparent;color:var(--accent);}
+  .form-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.05em;}
+
+  /* FOOTER */
+  footer{
+    padding:3rem clamp(1.5rem,5vw,4rem);border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+    flex-wrap:wrap;gap:1.5rem;
+  }
+  .footer-wordmark{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);}
+  .footer-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;text-align:right;line-height:1.8;}
+
+  /* ── MOBILE ── */
+  @media(max-width:900px){
+    #hero{grid-template-columns:1fr;grid-template-rows:auto auto auto;}
+    .hero-main{padding:3rem 0;grid-column:1;grid-row:1;}
+    .hero-questions{
+      grid-column:1;grid-row:2;
+      border-left:none;border-top:1px solid var(--line);
+      padding:2rem 0;
+    }
+    .hero-bottom{grid-row:3;}
+    .hero-bg-mark{display:none;}
+  }
+  @media(max-width:768px){
+    .nav-links{display:none;}
+    .nav-links.open{
+      display:flex;flex-direction:column;
+      position:fixed;top:64px;left:0;right:0;
+      background:var(--nav-bg);
+      padding:2rem;border-bottom:1px solid var(--line);gap:1.5rem;
+    }
+    .nav-toggle{display:flex;}
+    .problem-grid{grid-template-columns:1fr;gap:2.5rem;}
+    .what-layout{grid-template-columns:1fr;}
+    .what-sticky{position:static;}
+    .connect-layout{grid-template-columns:1fr;}
+    footer{flex-direction:column;align-items:flex-start;}
+    .footer-note{text-align:left;}
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-up{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease;}
+  .fade-up.visible{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-wordmark">Curiosity School</a>
+  <div class="nav-right">
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#problem">The Problem</a></li>
+      <li><a href="#what">What We Are</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#essays">Ideas</a></li>
+      <li><a href="#connect">Connect</a></li>
+    </ul>
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <!-- Sun: shown in dark mode, click to go light -->
+      <svg class="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <!-- Moon: shown in light mode, click to go dark -->
+      <svg class="icon-moon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+
+  <!-- Giant background question mark -->
+  <div class="hero-bg-mark" aria-hidden="true">?</div>
+
+  <!-- Left: main content -->
+  <div class="hero-main">
+    <div class="hero-eyebrow">Est. 2025 — An Ongoing Inquiry</div>
+    <h1 class="hero-title">
+      What is<br>
+      <span class="edu">Education</span><br>
+      for?
+    </h1>
+    <p class="hero-sub">
+      We study everything outside of us — and almost nothing within.
+      Curiosity School is a serious, open inquiry into what learning is,
+      what it has failed to do, and what it could become.
+    </p>
+    <div class="hero-cta">
+      <a href="#what" class="btn-primary">Read the Vision</a>
+      <a href="#connect" class="btn-secondary">Join the Inquiry</a>
+    </div>
+  </div>
+
+  <!-- Right: the questions -->
+  <div class="hero-questions">
+    <div class="questions-label">Questions we are sitting with</div>
+    <ul class="questions-list">
+      <li>
+        <span class="q-num">01</span>
+        <span class="q-text">What is education actually for — survival, conformity, or something else entirely?</span>
+      </li>
+      <li>
+        <span class="q-num">02</span>
+        <span class="q-text">Why do we study everything outside of us and almost nothing within?</span>
+      </li>
+      <li>
+        <span class="q-num">03</span>
+        <span class="q-text">Are we teaching people to think, or to perform thinking?</span>
+      </li>
+      <li>
+        <span class="q-num">04</span>
+        <span class="q-text">Why is farming, cooking, and nature absent from what we call essential education?</span>
+      </li>
+      <li>
+        <span class="q-num">05</span>
+        <span class="q-text">What does it mean to be psychologically secure — and why does no school teach it?</span>
+      </li>
+      <li>
+        <span class="q-num">06</span>
+        <span class="q-text">If education is meant to prepare us for life, whose life is it preparing us for?</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="hero-bottom">
+    <span class="hero-tagline">thecuriosityschool.com — Early Version</span>
+    <span class="hero-scroll-hint">Scroll to explore</span>
+  </div>
+
+</section>
+
+<!-- THE PROBLEM -->
+<section id="problem">
+  <div class="section-label" data-num="01 —">The Problem</div>
+  <div class="problem-grid">
+    <div class="problem-statement fade-up">
+      "We study what is outside of us and not ourselves — our minds, what we are. That is quite an ignorance."
+    </div>
+    <div class="problem-body">
+      <p class="fade-up">Education exists. Nobody asks why anymore. Schools are taken for granted — places children are sent, certificates that are collected, systems that process people. But the original question remains untouched: what is education actually for?</p>
+      <p class="fade-up">The modern education system is doing something, but it is not clear that it is doing the right thing. It is disconnecting human beings from nature. From themselves. From the foundational questions that make a life worth examining.</p>
+      <p class="fade-up">Survival skills — cooking, farming, understanding the body, psychological health, civic sense, financial literacy — are either absent or treated as decorative additions to an otherwise unchanged system. Meanwhile 60 million children of primary school age are not in school at all. Half of them are in conflict zones.</p>
+      <p class="fade-up">We are not solving the right problems. We are barely asking the right questions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE ARE -->
+<section id="what">
+  <div class="section-label" data-num="02 —">What We Are</div>
+  <div class="what-layout">
+    <div class="what-sticky">
+      <div class="big-question">?</div>
+      <h2>Not a school<br>in the usual<br><em>sense.</em></h2>
+    </div>
+    <div class="what-body">
+      <p class="fade-up">Curiosity School is not a platform selling courses. It is not a startup with a growth target. It is not a movement with a manifesto and followers. It is one person, starting from scratch, with a set of questions that won't go quiet.</p>
+      <p class="fade-up">The inquiry begins with a simple observation: the education we have built teaches people to navigate an external world that is becoming more complex, while saying almost nothing about what is happening inside. We produce skilled workers and confused human beings.</p>
+      <p class="fade-up">This is not just a critique of syllabus content. It is a question about the orientation of the whole enterprise. Are we teaching people to think, or to perform thinking? Are we teaching survival, or compliance? Are we teaching about money, or about value? About health, or about productivity?</p>
+      <p class="fade-up">Curiosity School wants to build resources — essays, videos, projects — that address the gaps nobody is addressing seriously. Financial literacy explained from first principles. Sex education that is actually useful. Nature and farming as foundations, not electives. And the interior life — what we are, how we function, what goes on inside — treated as a genuine subject of study.</p>
+      <p class="fade-up">The goal is not to produce a new curriculum. The goal is to find the others — the people who sense the same things, who want to think seriously and do something about it — and work together. Education does not happen only in institutions. It happens everywhere. That is the beginning of this.</p>
+      <p class="fade-up">This is an early version of something. What it becomes depends on who shows up.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label" data-num="03 —">Projects</div>
+  <h2>What we are<br><em>building.</em></h2>
+  <div class="projects-grid">
+    <div class="project-card fade-up">
+      <div class="project-status"><span class="status-dot"></span>In Progress</div>
+      <div class="project-title">The Education Inquiry</div>
+      <p class="project-desc">A series of essays and videos examining what education is for — its stated purposes, its actual effects, and what it consistently ignores.</p>
+    </div>
+    <div class="project-card fade-up">
+      <div class="project-status soon"><span class="status-dot"></span>Coming Soon</div>
+      <div class="project-title">Financial Freedom — From First Principles</div>
+      <p class="project-desc">What is money, really? Not investment advice. A series that explains money from its actual foundation — what it is, where it came from, how it works.</p>
+    </div>
+    <div class="project-card fade-up">
+      <div class="project-status soon"><span class="status-dot"></span>Coming Soon</div>
+      <div class="project-title">Sex Education — Honestly</div>
+      <p class="project-desc">The gap between what schools teach about sex and what people actually need to understand is enormous. This project intends to close it — without embarrassment, without agenda.</p>
+    </div>
+    <div class="project-card fade-up">
+      <div class="project-status soon"><span class="status-dot"></span>Forming</div>
+      <div class="project-title">What Are We, Inside?</div>
+      <p class="project-desc">Not neuroscience. Not self-help. A serious inquiry into psychological interiority — how we function, why we do what we do, and why this is absent from formal education.</p>
+    </div>
+    <div class="project-card fade-up">
+      <div class="project-status soon"><span class="status-dot"></span>Forming</div>
+      <div class="project-title">Nature & Survival Foundations</div>
+      <p class="project-desc">Farming, cooking, ecological literacy — treated not as hobbies but as foundations. The modern disconnection from nature has consequences. This project addresses them.</p>
+    </div>
+    <div class="project-card fade-up">
+      <div class="project-status soon"><span class="status-dot"></span>Open</div>
+      <div class="project-title">Your Project Here</div>
+      <p class="project-desc">If you have a serious idea that belongs in this inquiry — something the world needs and nobody is doing well — reach out. This list is not finished.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ESSAYS -->
+<section id="essays">
+  <div class="section-label" data-num="04 —">Ideas & Essays</div>
+  <h2>The thinking,<br><em>in writing.</em></h2>
+  <p class="essays-intro">Essays, notes, and half-formed thoughts. Updated as the inquiry develops.</p>
+  <div class="essay-list">
+    <a href="#" class="essay-item fade-up">
+      <span class="essay-num">01</span>
+      <div class="essay-content"><div class="essay-title">Education: What Is It Actually For?</div><div class="essay-meta">Essay — Foundation Series</div></div>
+      <span class="essay-arrow">→</span>
+    </a>
+    <a href="#" class="essay-item fade-up">
+      <span class="essay-num">02</span>
+      <div class="essay-content"><div class="essay-title">Basic Education for Survival — A Forgotten Idea</div><div class="essay-meta">Essay — Foundation Series</div></div>
+      <span class="essay-arrow">→</span>
+    </a>
+    <a href="#" class="essay-item fade-up">
+      <span class="essay-num">03</span>
+      <div class="essay-content"><div class="essay-title">Why Farming Belongs in Every Curriculum</div><div class="essay-meta">Essay — Nature & Survival</div></div>
+      <span class="essay-arrow">→</span>
+    </a>
+    <a href="#" class="essay-item fade-up">
+      <span class="essay-num">04</span>
+      <div class="essay-content"><div class="essay-title">Money Is Not What They Taught You It Was</div><div class="essay-meta">Essay — Financial Literacy</div></div>
+      <span class="essay-arrow">→</span>
+    </a>
+    <a href="#" class="essay-item fade-up">
+      <span class="essay-num">05</span>
+      <div class="essay-content"><div class="essay-title">Psychological Security — The Thing Nobody Is Teaching</div><div class="essay-meta">Essay — Interior Life</div></div>
+      <span class="essay-arrow">→</span>
+    </a>
+  </div>
+  <p class="fade-up" style="margin-top:2rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.1em;">More essays added regularly. Follow on YouTube or Instagram for updates.</p>
+</section>
+
+<!-- CHANNELS -->
+<section id="channels">
+  <div class="section-label" data-num="05 —">Find Us</div>
+  <h2>Where the<br><em>work lives.</em></h2>
+  <div class="channels-grid">
+    <a href="#" class="channel-card fade-up">
+      <div class="channel-icon">↗ YouTube</div>
+      <div class="channel-name">Curiosity School</div>
+      <p class="channel-desc">Videos, essays read aloud, conversations, and the longer form thinking.</p>
+      <div class="channel-arrow">Watch →</div>
+    </a>
+    <a href="#" class="channel-card fade-up">
+      <div class="channel-icon">↗ Instagram</div>
+      <div class="channel-name">@thecuriosityschool</div>
+      <p class="channel-desc">Shorter form ideas, questions worth sitting with, and updates on what is being built.</p>
+      <div class="channel-arrow">Follow →</div>
+    </a>
+  </div>
+</section>
+
+<!-- CONNECT -->
+<section id="connect">
+  <div class="section-label" data-num="06 —">Connect</div>
+  <div class="connect-layout">
+    <div class="connect-text">
+      <h2>Want to<br>help build<br><em>this?</em></h2>
+      <p>This is one person and a set of questions. If you share the same sense that something important is missing from how we think about education — and you want to think seriously about it, write about it, make things about it — reach out.</p>
+      <p>There is no formal application. No team structure yet. Just an inquiry that needs more minds. If you have something to contribute — an idea, a skill, a project — say so.</p>
+      <p>Suggestions, disagreements, and honest criticism are also welcome. This is not a finished thing.</p>
+    </div>
+    <div>
+      <form class="connect-form" name="connect" method="POST" action="https://formspree.io/f/YOUR_FORM_ID">
+        <input type="hidden" name="_subject" value="Curiosity School — New Message">
+        <div class="form-group">
+          <label class="form-label" for="fname">Your Name</label>
+          <input class="form-input" type="text" id="fname" name="name" placeholder="How should we address you?" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="femail">Email</label>
+          <input class="form-input" type="email" id="femail" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fnature">Nature of Message</label>
+          <select class="form-select" id="fnature" name="nature">
+            <option value="">Select one</option>
+            <option value="want-to-help">I want to help build this</option>
+            <option value="idea">I have an idea or project</option>
+            <option value="disagreement">I disagree with something</option>
+            <option value="question">I have a question</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fmessage">Your Message</label>
+          <textarea class="form-textarea" id="fmessage" name="message" placeholder="Say whatever needs saying." required></textarea>
+        </div>
+        <button type="submit" class="form-submit">Send Message</button>
+        <p class="form-note">No newsletters. No mailing lists. Just a human reading this.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-wordmark">The Curiosity School — thecuriosityschool.com</span>
+  <div class="footer-note">An ongoing inquiry. Early version.<br>Built with curiosity. Updated with intention.</div>
+</footer>
+
+<script>
+  // Theme toggle
+  const root = document.documentElement;
+  const toggleBtn = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('cs-theme') || 'dark';
+  root.setAttribute('data-theme', savedTheme);
+
+  toggleBtn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('cs-theme', next);
+  });
+
+  // Mobile nav
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => links.classList.toggle('open'));
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
+
+  // Fade-up on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Nav active state
+  const sections = document.querySelectorAll('section[id]');
+  const navAnchors = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    navAnchors.forEach(a => { a.style.color = a.getAttribute('href') === '#' + current ? 'var(--accent)' : ''; });
+  }, { passive: true });
+</script>
+</body>
+</html>
